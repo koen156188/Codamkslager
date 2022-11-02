@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/01 14:52:25 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/01 14:55:08 by kslager       ########   odam.nl         */
+/*   Updated: 2022/11/03 00:26:08 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,7 @@
 # define FT_PRINTF_H
 # include <unistd.h>
 # include <stdarg.h>
-# include <stdio.h>
 
-void	ft_putchar(char a);
-void	ft_putnbr(int n);
-int		ft_printf(const char *var, int a);
+int	ft_printf(const char *format, ...);
 
 #endif

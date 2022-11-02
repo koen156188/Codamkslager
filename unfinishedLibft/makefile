@@ -47,7 +47,7 @@ OBJFILES = $(SRCFILES:%.c=%.o)
 $(NAME): $(OBJFILES)
 	$(AR) $(NAME) $(OBJFILES) 
 
-%.o: %.c $(OBJFILES) $(HEADER)
+%.o: %.c $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(NAME)

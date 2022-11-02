@@ -1,42 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   ft_strtrim.c                                       :+:    :+:            */
+/*   ft_memcpy.c                                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2022/10/15 17:48:43 by kslager       #+#    #+#                 */
-/*   Updated: 2022/10/28 19:19:22 by kslager       ########   odam.nl         */
+/*   Created: 2022/10/10 17:44:41 by kslager       #+#    #+#                 */
+/*   Updated: 2022/11/02 19:43:43 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include "libft.h"
 
-char	*ft_strtrim(char const *s1, char const *set)
+void	*ft_memcpy(void *dst, void const *src, size_t n)
 {
-	char	*str;
-	int		i;
-	int		j;
+	unsigned char	*s1;
+	unsigned char	*s2;
 
-	i = 0;
-	if (!s1 || !set)
-		return (NULL);
-	while (*s1 && ft_strchr(set, *s1))
-		s1++;
-	j = ft_strlen((char *)s1);
-	while (j >= 0 && ft_strchr(set, s1[j]))
-		j--;
-	str = ft_substr((char *)s1, 0, j + 1);
-	return (str);
+	s1 = (unsigned char *) dst;
+	s2 = (unsigned char *) src;
+	if (n == 0 || s2 == s1)
+		return (dst);
+	while (n--)
+		*s1++ = *s2++;
+	return (dst);
 }
 
 // int main()
 // {
-// 	const char *s1 = "hello my name is koen";
-// 	const char *s2 = "hen";
-// 	printf("%s", ft_strtrim(s1, s2));
-// 	return (0);
+//     char s1[5] = "whats";
+//     char s2[5] = "whats";
+//     printf("%s\n", ft_memcpy(s1, s2, 5));
+//     printf("%s\n", memcpy(s1, s2, 5));
+//     return(0);
 // }

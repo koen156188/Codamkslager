@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/10/31 16:41:41 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/01 22:30:51 by kslager       ########   odam.nl         */
+/*   Updated: 2022/11/02 20:26:58 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,16 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-// #include "ft_printf.h"
 
 int	ft_putchar(char a)
 {
-	write(1, &a, 1);
-	return (1);
+	return (write(1, &a, 1));
 }
 
 int	ft_putstr(char *s, int printlen)
 {
+	if (s == NULL)
+		return (ft_putstr("(null)", 0));
 	while (*s)
 		printlen += ft_putchar(*s++);
 	return (printlen);
@@ -31,16 +31,17 @@ int	ft_putstr(char *s, int printlen)
 
 int	ft_putnbr(int n, int printlen)
 {
+	if (n == -2147483648)
+		return (ft_putstr("-2147483648", 0));
 	if (n < 0)
 	{
 		printlen += ft_putchar('-');
 		n = n * -1;
 	}
 	if (n >= 10)
-		printlen += ft_putnbr((n / 10), 0);
-	n = n % 10;
+		printlen += ft_putnbr((n / 10), 0) + ft_putnbr((n % 10), 0);
 	if (n < 10)
-		printlen += (ft_putchar(n += '0'));
+		printlen += (ft_putchar(n + '0'));
 	return (printlen);
 }
 
@@ -54,6 +55,27 @@ int	ft_putunint(unsigned int n, int printlen)
 	return (printlen);
 }
 
+int	ft_hexa(unsigned long int n, int prilen, int factor)
+{
+	if (factor == 2)
+		return (prilen += ft_putstr("0x", 0) + ft_hexa(n, 0, 0));
+	if (n >= 16)
+	{
+		prilen += ft_hexa((n / 16), 0, factor);
+		prilen += ft_hexa((n % 16), 0, factor);
+	}
+	else if (n < 10)
+		prilen += ft_putchar(n + '0');
+	else
+	{
+		if (factor == 0)
+			prilen += ft_putchar((n % 10) + 'a');
+		if (factor == 1)
+			prilen += ft_putchar((n % 10) + 'A');
+	}
+	return (prilen);
+}
+
 int	printer(const char *format, int i, va_list ar, int prilen)
 {
 	if (format[i] == 'c')
@@ -63,9 +85,15 @@ int	printer(const char *format, int i, va_list ar, int prilen)
 	if (format[i] == 's')
 		prilen += ft_putstr(va_arg(ar, char *), 0);
 	if (format[i] == 'u')
-		prilen += ft_putunint(va_arg(ar, unsigned int), 0);
+		prilen += ft_putunint(va_arg(ar, unsigned long int), 0);
 	if (format[i] == '%')
 		prilen += ft_putchar('%');
+	if (format[i] == 'x')
+		prilen += ft_hexa(va_arg(ar, unsigned int), 0, 0);
+	if (format[i] == 'X')
+		prilen += ft_hexa(va_arg(ar, unsigned int), 0, 1);
+	if (format[i] == 'p')
+		prilen += ft_hexa(va_arg(ar, unsigned long int), 0, 2);
 	return (prilen);
 }
 
@@ -91,20 +119,4 @@ int	ft_printf(const char *format, ...)
 	}
 	va_end(ar);
 	return (printlen);
-}
-
-int main ()
-{
-	char *adress = malloc(strlen(k) * sizeof(char))
-	if (!adress)
-		return (NULL);
-	char *k = "hallo";
-	void *ptr = &k;
-	printf("%lu\n", strlen(ptr));
-	write(1, (&ptr), 5);
-	// int j = printf("%p\n", kk);
-
-	// printf("mine   : \n%i\n", l); 
-	// printf("printf : %i\n", j);
-	
 }
