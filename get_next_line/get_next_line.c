@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:22 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/10 22:16:23 by kslager       ########   odam.nl         */
+/*   Updated: 2022/11/23 21:19:36 by kslager       ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,111 +18,123 @@
 #include <fcntl.h> 
 #include <stdio.h>
 
-int		find_nterm(int fd, char *buffer);
-void	*ft_calloc(size_t count, size_t size);
-void	*ft_strlcat(char *buffer, char *temp, int len);
+void	ft_bzero(void *s, size_t n)
+{
+	size_t			i;
+	unsigned char	*s1;
+
+	s1 = (unsigned char *)s;
+	i = 0;
+	while (i < n)
+	{
+		s1[i] = 0;
+		i++;
+	}
+}
+
+void	*ft_calloc(size_t count, size_t size)
+{
+	void	*i;
+
+	i = (void *) malloc(count * size);
+	if (i == 0)
+		return (0);
+	ft_bzero(i, count * size);
+	return (i);
+}
 
 int	ft_strlen(char *str)
 {
 	int	i;
 
 	i = 0;
-	if (str == NULL)
+	if (!str)
 		return (0);
-	while (str[i])
+	while (str[i] != '\0')
 		i++;
 	return (i);
 }
 
-void	*ft_strlcat(char *buffer, char *temp, int len)
+char	*ft_strdup(const char *s1)
 {
+	char	*str;
 	int		i;
-	int		j;
-	char	*newstr;
+	int		len;
 
-	newstr = ft_calloc((len + ft_strlen(temp)), sizeof (char));
-	if (!newstr)
-		return (NULL);
-	while (i < ft_strlen(temp))
-	{
-		newstr[i] = temp[i];
-		i++;
-	}
-	while (j < len)
-	{
-		newstr[i] = buffer[j];
-		i++;
-		j++;
-	}
-	newstr[i] = '\0';
-	return (newstr);
-}
-
-void	*ft_calloc(size_t count, size_t size)
-{
-	unsigned char	*s;
-	size_t			i;
-
+	len = 0;
 	i = 0;
-	s = (unsigned char *) malloc(count * size);
-	if (s == NULL)
-		return (NULL);
-	while (i < (size * count))
+	while (s1[len] != '\0')
+		len++;
+	str = ft_calloc(len + BUFFER_SIZE + 1, sizeof(char));
+	if (str == 0)
+		return (0);
+	while (s1[i] != '\0')
 	{
-		s[i] = 0;
+		str[i] = s1[i];
 		i++;
 	}
-	return (s);
+	return (str);
 }
 
-int	find_nterm(int fd, char *buffer)
+int	findn(char *temp)
 {
 	int	i;
 
 	i = 0;
-	while (buffer[i] != '\n')
+	while (temp[i] != '\0')
 	{
-		i++;
+		if (temp[i] == '\n')
+			return (i);
+		else
+			i++;
 	}
-	i++;
 	return (i);
 }
 
-// char	*ft_shortline(char *buffer, char *temp, int count)
-// {
-	
-// }
+char	*ft_strmake(char *temp, char *str)
+{
+	int	i; 
+
+	i = 0;
+	i = findn(temp);
+}
+
+char  *ft_readline(int fd, char *temp, char *str)
+{
+	int	readvalue;
+
+	readvalue = 0;
+	while (/*n not found*/)
+	{
+		readvalue = read(fd, temp, BUFFER_SIZE);
+		str = ft_strmake(temp, str);
+		if (findn(temp) < BUFFER_SIZE)
+			break ;
+		else
+		{	
+			free (temp);
+			
+		}	
+	}
+}
 
 char	*get_next_line(int fd)
 {
-	char static	*buffer;
+	static char	*buffer;
 	char		*temp;
 	char		*str;
 	int			count;
-	int			readvalue;
 
-	count = 0;
-	readvalue = 0;
-	temp = ft_strlcat(temp, buffer, ft_strlen(temp));
-	temp = malloc((BUFFER_SIZE + ft_strlen(temp)) * sizeof (char));
-	if (!temp)
-		return (NULL);
-	readvalue = read(fd, temp, BUFFER_SIZE);
-	count = find_nterm(fd, temp);
-	while (count == BUFFER_SIZE)
+	if (!buffer)
 	{
-		count = find_nterm(fd, temp);
-		temp = ft_strlcat(temp, str, count);
-		readvalue = read(fd, temp, BUFFER_SIZE);
+		temp = ft_calloc(BUFFER_SIZE + 1, sizeof (char));
+		if (!temp)
+			return (NULL);
 	}
-	if (readvalue == 0)
-	{
-		buffer = ft_strlcat(buffer, str, ft_strlen(buffer));
-		return (ft_strlcat(temp, str, (find_nterm(fd, buffer) - 1)));
-	}
-	// if (count != BUFFER_SIZE)
-	// 	ft_shortline(buffer, temp, count);
-	return (temp);
+	else
+		temp = strdup(buffer);
+	str = ft_readline(fd, temp, str);
+	return (str);
 }
 
 int	main(void)
@@ -139,9 +151,9 @@ int	main(void)
 	close (fd);
 }
 
-		// printf("value : %s\n", &buffer[i]);
-		// printf("bufferlen : %lu\n", strlen(&buffer[i]));
-		// printf("linelen : %i\n", linelen);
+// printf("value : %s\n", &buffer[i]);
+// printf("bufferlen : %lu\n", strlen(&buffer[i]));
+// printf("linelen : %i\n", linelen);
 // 		char	*get_next_line(int fd)
 // {
 // 	int			buffer_size = BUFFER_SIZE;
