@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:22 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/23 21:19:36 by kslager       ########   odam.nl         */
+/*   Updated: 2022/11/24 19:02:24 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,23 @@ int	ft_strlen(char *str)
 	return (i);
 }
 
+char	*ft_strrchr(char *str, int c)
+{
+	int	i;
+
+	i = 0;
+	i = ft_strlen(str);
+	if (str == NULL)
+		return (NULL);
+	while (i >= 0)
+	{
+		if (str[i] == (char)c)
+			return ((char *)&str[i]);
+		i--;
+	}
+	return (NULL);
+}
+
 char	*ft_strdup(const char *s1)
 {
 	char	*str;
@@ -76,27 +93,29 @@ char	*ft_strdup(const char *s1)
 	return (str);
 }
 
-int	findn(char *temp)
+char	*ft_strjoin(char *s1, char *s2)
 {
-	int	i;
+	char	*str;
+	int		i;
+	int		j;
 
 	i = 0;
-	while (temp[i] != '\0')
-	{
-		if (temp[i] == '\n')
-			return (i);
-		else
-			i++;
-	}
-	return (i);
-}
-
-char	*ft_strmake(char *temp, char *str)
-{
-	int	i; 
-
-	i = 0;
-	i = findn(temp);
+	j = 0;
+	if (!s2)
+		return (ft_strdup(s1));
+	if (!s1)
+		return (ft_strdup(s2));
+	if (!s1 && !s2)
+		return (NULL);
+	str = (char *) ft_calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
+	if (!str)
+		return (NULL);
+	while (s1[j])
+		str[i++] = s1[j++];
+	j = 0;
+	while (s2[j])
+		str[i++] = s2[j++];
+	return (str);
 }
 
 char  *ft_readline(int fd, char *temp, char *str)
@@ -104,18 +123,23 @@ char  *ft_readline(int fd, char *temp, char *str)
 	int	readvalue;
 
 	readvalue = 0;
-	while (/*n not found*/)
+	temp = ft_calloc(BUFFER_SIZE, sizeof(char));
+	if (!temp)
+		return (NULL);
+	if (temp[0] == '\0')
+		readvalue = read(fd, temp, BUFFER_SIZE);
+	while (!ft_strrchr(str, '\n') || readvalue > 0)
 	{
 		readvalue = read(fd, temp, BUFFER_SIZE);
-		str = ft_strmake(temp, str);
-		if (findn(temp) < BUFFER_SIZE)
-			break ;
-		else
-		{	
+		if (readvalue > 0)
+		{
 			free (temp);
-			
-		}	
+			return (NULL);
+		}
+		str = ft_strjoin(str, temp);
 	}
+	free (temp);
+	return (str);
 }
 
 char	*get_next_line(int fd)
@@ -123,18 +147,10 @@ char	*get_next_line(int fd)
 	static char	*buffer;
 	char		*temp;
 	char		*str;
-	int			count;
 
-	if (!buffer)
-	{
-		temp = ft_calloc(BUFFER_SIZE + 1, sizeof (char));
-		if (!temp)
-			return (NULL);
-	}
-	else
-		temp = strdup(buffer);
 	str = ft_readline(fd, temp, str);
 	return (str);
+	
 }
 
 int	main(void)

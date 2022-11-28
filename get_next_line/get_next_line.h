@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:46 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/10 20:25:24 by kslager       ########   odam.nl         */
+/*   Updated: 2022/11/24 18:50:33 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 #  define BUFFER_SIZE 42
 
 char	*get_next_line(int fd);
-char	*makeline(char *buffer, int fd);
-
 
 # endif
 #endif
