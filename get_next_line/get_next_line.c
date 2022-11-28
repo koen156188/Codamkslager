@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:22 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/24 19:02:24 by koenslager    ########   odam.nl         */
+/*   Updated: 2022/11/28 19:05:05 by kslager       ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,29 @@ int	ft_strlen(char *str)
 	if (!str)
 		return (0);
 	while (str[i] != '\0')
+		i++;
+	return (i);
+}
+
+size_t	ft_strlcpy(char *dst, char *src, size_t dstsize)
+{
+	size_t	i;
+
+	i = 0;
+	if (dstsize == 0)
+	{
+		while (src[i] != '\0')
+			i++;
+		return (i);
+	}
+	while (i < dstsize - 1 && src[i] != '\0')
+	{
+		dst[i] = src[i];
+		i++;
+	}
+	if (i < dstsize)
+		dst[i] = '\0';
+	while (src[i] != '\0')
 		i++;
 	return (i);
 }
@@ -118,39 +141,71 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (str);
 }
 
-char  *ft_readline(int fd, char *temp, char *str)
+char	*ft_substr(char *s, unsigned int start, size_t len)
 {
-	int	readvalue;
+	char	*substr;
 
-	readvalue = 0;
-	temp = ft_calloc(BUFFER_SIZE, sizeof(char));
+	if (!s)
+		return (NULL);
+	if (start >= ft_strlen(s))
+		return (ft_strdup("\0"));
+	if (ft_strlen(s) - start < len)
+		len = ft_strlen(s) - start + 1;
+	else
+		len += 1;
+	substr = (char *) malloc(len);
+	if (substr == 0)
+		return (NULL);
+	ft_strlcpy(substr, s + start, len);
+	return (substr);
+}
+
+int	findn(char *str)
+{
+	int	i;
+	i = 0;
+	while (str[i] != '\n')
+	{
+		i++;
+	}
+	return (i);
+}
+
+char  *ft_readline(int fd, char *str, char *temp)
+{
+	int		readvalue;
+
+	readvalue = 1;
+	temp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (!temp)
 		return (NULL);
-	if (temp[0] == '\0')
-		readvalue = read(fd, temp, BUFFER_SIZE);
-	while (!ft_strrchr(str, '\n') || readvalue > 0)
+	while (!ft_strrchr(str, '\n') && readvalue > 0)
 	{
 		readvalue = read(fd, temp, BUFFER_SIZE);
-		if (readvalue > 0)
+		str = ft_strjoin(str, temp);
+		if (!str)
 		{
-			free (temp);
+			free(str);
 			return (NULL);
 		}
-		str = ft_strjoin(str, temp);
+		if (ft_strrchr(str, '\n'))
+			break ;
 	}
-	free (temp);
 	return (str);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*buffer;
-	char		*temp;
 	char		*str;
+	char		*temp;
 
-	str = ft_readline(fd, temp, str);
+	if (buffer)
+		temp = ft_strdup(buffer);
+	str = ft_readline(fd, str, temp);
+	str = ft_substr(str, 0, findn(str));
+	buffer = ft_strdup(str);
 	return (str);
-	
 }
 
 int	main(void)
@@ -158,9 +213,9 @@ int	main(void)
 	int	fd = open("test.txt", O_RDONLY);
 	int	i = 0;
 
-	while (i < 2)
+	while (i < 10)
 	{
-		printf("%d :[%s]\n", i, get_next_line(fd));
+		printf("%d :||[%s]||\n", i, get_next_line(fd));
 		printf("---------------------------\n");
 		i++;
 	}
