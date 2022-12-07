@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:46 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/24 18:50:33 by koenslager    ########   odam.nl         */
+/*   Updated: 2022/12/07 13:39:25 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
+# endif
 
 char	*get_next_line(int fd);
 
-# endif
 #endif

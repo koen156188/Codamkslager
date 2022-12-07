@@ -6,7 +6,7 @@
 /*   By: kslager <kslager@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/03 20:47:22 by kslager       #+#    #+#                 */
-/*   Updated: 2022/11/28 19:05:05 by kslager       ########   odam.nl         */
+/*   Updated: 2022/12/07 16:32:40 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,21 +78,20 @@ size_t	ft_strlcpy(char *dst, char *src, size_t dstsize)
 	return (i);
 }
 
-char	*ft_strrchr(char *str, int c)
+char	*ft_strchr(char *s, int c)
 {
-	int	i;
+	int		i;
+	char	j;
 
+	j = (char)c;
 	i = 0;
-	i = ft_strlen(str);
-	if (str == NULL)
-		return (NULL);
-	while (i >= 0)
+	while (s[i] != j)
 	{
-		if (str[i] == (char)c)
-			return ((char *)&str[i]);
-		i--;
+		if (s[i] == '\0')
+			return (NULL);
+		i++;
 	}
-	return (NULL);
+	return ((char *)&s[i]);
 }
 
 char	*ft_strdup(const char *s1)
@@ -130,31 +129,37 @@ char	*ft_strjoin(char *s1, char *s2)
 		return (ft_strdup(s2));
 	if (!s1 && !s2)
 		return (NULL);
-	str = (char *) ft_calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
+	str = malloc((ft_strlen(s1) + ft_strlen(s2)) * sizeof(char));
 	if (!str)
 		return (NULL);
-	while (s1[j])
-		str[i++] = s1[j++];
+	while (s1[j] != '\0')
+	{
+		str[i] = s1[j];
+		i++;
+		j++;
+	}
 	j = 0;
-	while (s2[j])
-		str[i++] = s2[j++];
+	while (s2[j] != '\0')
+	{
+		str[i] = s2[j];
+		i++;
+		j++;
+	}
 	return (str);
 }
 
-char	*ft_substr(char *s, unsigned int start, size_t len)
+char	*ft_substr(char *s, int start, size_t len)
 {
 	char	*substr;
 
 	if (!s)
 		return (NULL);
-	if (start >= ft_strlen(s))
-		return (ft_strdup("\0"));
 	if (ft_strlen(s) - start < len)
 		len = ft_strlen(s) - start + 1;
 	else
 		len += 1;
-	substr = (char *) malloc(len);
-	if (substr == 0)
+	substr = (char *) ft_calloc(len, sizeof(char));
+	if (!substr)
 		return (NULL);
 	ft_strlcpy(substr, s + start, len);
 	return (substr);
@@ -168,18 +173,20 @@ int	findn(char *str)
 	{
 		i++;
 	}
+	i++;
 	return (i);
 }
 
-char  *ft_readline(int fd, char *str, char *temp)
+char  *ft_readline(int fd, char *str)
 {
 	int		readvalue;
+	char	*temp;
 
-	readvalue = 1;
-	temp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	temp = ft_calloc(BUFFER_SIZE, sizeof(char));
 	if (!temp)
 		return (NULL);
-	while (!ft_strrchr(str, '\n') && readvalue > 0)
+	readvalue = BUFFER_SIZE;
+	while (!ft_strchr(str, '\n') && readvalue > 0)
 	{
 		readvalue = read(fd, temp, BUFFER_SIZE);
 		str = ft_strjoin(str, temp);
@@ -188,8 +195,6 @@ char  *ft_readline(int fd, char *str, char *temp)
 			free(str);
 			return (NULL);
 		}
-		if (ft_strrchr(str, '\n'))
-			break ;
 	}
 	return (str);
 }
@@ -198,22 +203,33 @@ char	*get_next_line(int fd)
 {
 	static char	*buffer;
 	char		*str;
-	char		*temp;
 
 	if (buffer)
-		temp = ft_strdup(buffer);
-	str = ft_readline(fd, str, temp);
+	{
+		if (strchr(buffer, '\n'))
+		{
+			buffer = ft_substr(buffer, findn(buffer), strlen(buffer) + 1);
+			str = ft_substr(buffer, 0, findn(buffer));
+			return (str);
+		}
+	}
+	str = ft_strjoin(buffer, ft_readline(fd, str));
+	if (!str)
+		return (NULL);
+	// printf("line : [%s]\n", str);
+	buffer = ft_substr(str, findn(str), strlen(str) + 1);
 	str = ft_substr(str, 0, findn(str));
-	buffer = ft_strdup(str);
 	return (str);
 }
 
 int	main(void)
 {
-	int	fd = open("test.txt", O_RDONLY);
-	int	i = 0;
+	int	fd;
+	int	i;
 
-	while (i < 10)
+	i = 0;
+	fd = open("test.txt", O_RDONLY);
+	while (i <= 9)
 	{
 		printf("%d :||[%s]||\n", i, get_next_line(fd));
 		printf("---------------------------\n");
@@ -221,36 +237,3 @@ int	main(void)
 	}
 	close (fd);
 }
-
-// printf("value : %s\n", &buffer[i]);
-// printf("bufferlen : %lu\n", strlen(&buffer[i]));
-// printf("linelen : %i\n", linelen);
-// 		char	*get_next_line(int fd)
-// {
-// 	int			buffer_size = BUFFER_SIZE;
-// 	static char	*buffer;
-// 	char		*temp;
-// 	int			i = 0;
-// 	int			linelen = 0;
-
-// 	buffer = malloc((buffer_size) * sizeof (char));
-// 	if (!buffer)
-// 		return (NULL);
-// 	while (i != 3)
-// 	{
-// 		read(fd, buffer, buffer_size);
-// 		linelen = find_nterm(fd, buffer);
-// 		printf("buffer : [%s]\n", buffer);
-// 		printf("linelen : %i\n", linelen);
-// 		if (linelen < buffer_size)
-// 		{
-// 			temp = ft_makeline(buffer, linelen);
-// 			printf("after i : %i\n", i);
-// 			buffer -= 10;
-// 			printf("%zu\n", strlen(buffer));
-// 			return (temp);
-// 		}
-// 		i = 3;
-// 	}
-// 	return (NULL);
-// }
