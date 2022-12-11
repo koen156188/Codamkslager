@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   get_next_line.c                                    :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: kslager <kslager@student.codam.nl>           +#+                     */
+/*   By: koenslager <koenslager@student.codam.nl      +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2022/11/03 20:47:22 by kslager       #+#    #+#                 */
-/*   Updated: 2022/12/07 22:02:13 by koenslager    ########   odam.nl         */
+/*   Created: 2022/12/09 01:01:35 by koenslager    #+#    #+#                 */
+/*   Updated: 2022/12/09 16:57:33 by koenslager    ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,31 +18,6 @@
 #include <fcntl.h> 
 #include <stdio.h>
 
-void	ft_bzero(void *s, size_t n)
-{
-	size_t			i;
-	unsigned char	*s1;
-
-	s1 = (unsigned char *)s;
-	i = 0;
-	while (i < n)
-	{
-		s1[i] = 0;
-		i++;
-	}
-}
-
-void	*ft_calloc(size_t count, size_t size)
-{
-	void	*i;
-
-	i = (void *) malloc(count * size);
-	if (i == 0)
-		return (0);
-	ft_bzero(i, count * size);
-	return (i);
-}
-
 int	ft_strlen(char *str)
 {
 	int	i;
@@ -51,29 +26,6 @@ int	ft_strlen(char *str)
 	if (!str)
 		return (0);
 	while (str[i] != '\0')
-		i++;
-	return (i);
-}
-
-size_t	ft_strlcpy(char *dst, char *src, size_t dstsize)
-{
-	size_t	i;
-
-	i = 0;
-	if (dstsize == 0)
-	{
-		while (src[i] != '\0')
-			i++;
-		return (i);
-	}
-	while (i < dstsize - 1 && src[i] != '\0')
-	{
-		dst[i] = src[i];
-		i++;
-	}
-	if (i < dstsize)
-		dst[i] = '\0';
-	while (src[i] != '\0')
 		i++;
 	return (i);
 }
@@ -104,7 +56,7 @@ char	*ft_strdup(const char *s1)
 	i = 0;
 	while (s1[len] != '\0')
 		len++;
-	str = ft_calloc(len + BUFFER_SIZE + 1, sizeof(char));
+	str = malloc((len + BUFFER_SIZE + 1) * sizeof(char));
 	if (str == 0)
 		return (0);
 	while (s1[i] != '\0')
@@ -112,6 +64,7 @@ char	*ft_strdup(const char *s1)
 		str[i] = s1[i];
 		i++;
 	}
+	str[i] = '\0';
 	return (str);
 }
 
@@ -148,71 +101,93 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (str);
 }
 
-char	*ft_substr(char *s, int start, size_t len)
+char	*ft_joinline(char *dest, char *src)
 {
-	char	*substr;
+	int		i;
+	int		j;
+	char	*newline;
 
-	if (!s)
-		return (NULL);
-	if (ft_strlen(s) - start < len)
-		len = ft_strlen(s) - start + 1;
-	else
-		len += 1;
-	substr = (char *) ft_calloc(len, sizeof(char));
-	if (!substr)
-		return (NULL);
-	ft_strlcpy(substr, s + start, len);
-	return (substr);
-}
-
-int	findn(char *str)
-{
-	int	i;
 	i = 0;
-	while (str[i] != '\n')
+	j = 0;
+	if (!dest)
+		return (ft_strdup(src));
+	if (!src)
+		return (ft_strdup(dest));
+	newline = malloc((ft_strlen(dest) + ft_strlen(src) + 1) * sizeof(char));
+	if (!newline)
+		return (NULL);
+	while (dest[i] != '\0' && dest[i] != '\n')
 	{
+		newline[i] = dest[i];
 		i++;
-		if (str[i] == '\n')
-			return (i + 1);
 	}
-	i++;
-	return (i);
+	while (src[j] != '\0' && src[j] != '\n')
+	{
+		newline[i] = src[j];
+		i++;
+		j++;
+	}
+	newline[i] = '\0';
+	return (newline);
 }
 
-char  *ft_readline(int fd, char *str)
+char	*leftoverline(char *line)
 {
-	int		readvalue;
-	char	*temp;
+	char	*leftover;
+	int		i;
 
-	temp = ft_calloc(BUFFER_SIZE, sizeof(char));
+	i = 0;
+	while (line[i] != '\n' && line[i] != '\0')
+		i++;
+	leftover = malloc((i + 2) * sizeof(char));
+	if (!leftover)
+		return (NULL);
+	i = 0;
+	while (line[i] != '\n' && line[i] != '\0')
+	{
+		leftover[i] = line[i];
+		i++;
+	}
+	leftover[i++] = '\n';
+	leftover[i] = '\0';
+	return (leftover);
+}
+
+char	*ft_readline(int fd, char *line)
+{
+	char	*temp;
+	int		readvalue;
+
+	temp = malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!temp)
 		return (NULL);
 	readvalue = BUFFER_SIZE;
-	while (!ft_strchr(str, '\n') && readvalue > 0)
+	while (!ft_strchr(temp, '\n') && readvalue > 0)
 	{
 		readvalue = read(fd, temp, BUFFER_SIZE);
-		str = ft_strjoin(str, temp);
-		if (!str)
+		if (!temp)
 		{
-			free(str);
+			free (temp);
 			return (NULL);
 		}
+		// printf("temp : [%s]\n", temp);
+		line = ft_strjoin(line, temp);
 	}
-	return (str);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*buffer;
-	char		*str;
+	char		*line;
 
-	str = ft_strjoin(buffer, ft_readline(fd, str));
-	if (!str)
-		return (NULL);
-	// printf("line : [%s]\n", str);
-	buffer = ft_substr(str, findn(str), strlen(str) + 1);
-	str = ft_substr(str, 0, findn(str));
-	return (str);
+	// if (!fd || read(fd, 0, 0) <= 0)
+	// 	return (NULL);
+	line = ft_readline(fd, line);
+	printf("line : {%s}\n", buffer);
+	buffer = leftoverline(line);
+	line = ft_joinline(buffer, line);
+	return (line);
 }
 
 int	main(void)
